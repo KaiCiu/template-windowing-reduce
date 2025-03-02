@@ -9,10 +9,9 @@ import os
 
 from quixstreams import Application
 
-# 确保 state 目录一致
-app = Application.Quix(state_directory="/app/state")
+# 初始化 Quix 应用
+app = Application.Quix()
 destination_topic = app.topic(name='raw-temp-data', value_serializer="json")
-
 
 @dataclass
 class Temperature:
@@ -23,7 +22,6 @@ class Temperature:
         data = asdict(self)
         data['ts'] = self.ts.isoformat()
         return data  # 返回字典，而不是 JSON 字符串（方便后续存文件）
-
 
 # 参数设置
 T_ambient = 15.0  # 初始温度
@@ -45,7 +43,7 @@ with app.get_producer() as producer:
     while True:
         sensor_id = random.choice(["Sensor1", "Sensor2", "Sensor3", "Sensor4", "Sensor5"])
         elapsed_time = time() - start_time  # 计算运行时间
-
+        
         if elapsed_time <= total_heating_time:
             # 指数升温公式
             current_temperature = T_ambient + (T_final - T_ambient) * (1 - math.exp(-k * elapsed_time))
@@ -53,14 +51,14 @@ with app.get_producer() as producer:
             if boiling_start_time is None:
                 boiling_start_time = time()
                 stop_time = boiling_start_time + boiling_duration  # 计算停止时间
-
+            
             if time() >= stop_time:
                 print("Simulation finished.")
                 break  # 停止数据生成
 
             # 维持 100°C
             current_temperature = T_final
-
+        
         # 生成数据
         temperature = Temperature(datetime.now(), round(current_temperature, 2))
         data_dict = temperature.to_json()  # 转成字典
@@ -80,13 +78,16 @@ with app.get_producer() as producer:
         i += 1
         sleep(random.randint(0, 1000) / 1000)  # 维持数据频率
 
+# **Quix Cloud 适配：存储数据到 Quix 文件存储**
 # 生成文件名（包含处理完成时间）
 finish_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 file_name = f"temperature_data_{finish_time}.json"
-file_path = os.path.join(os.getcwd(), file_name)
+
+# 在 Quix Cloud 运行时，建议存储到 `/mnt/data/`，这样可以在 Quix UI 的 **File Storage** 访问
+file_path = f"/mnt/data/{file_name}"
 
 # 保存数据到 JSON 文件
 with open(file_path, "w", encoding="utf-8") as f:
     json.dump(data_records, f, indent=4)
 
-print(f"Data archived to {file_path}")
+print(f"Data archived to {file_path} (accessible in Quix File Storage)")
