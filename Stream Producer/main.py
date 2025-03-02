@@ -6,8 +6,14 @@ import json
 import random
 import math
 import os
+import warnings
 
 from quixstreams import Application
+
+# 确保 Quix Cloud 使用默认的 /app/state 目录
+if os.getenv("QUIX_STATE_DIR") != "/app/state":
+    os.environ["QUIX_STATE_DIR"] = "/app/state"
+    warnings.warn("Setting QUIX_STATE_DIR to /app/state to match Quix Platform.")
 
 # 初始化 Quix 应用
 app = Application.Quix()
