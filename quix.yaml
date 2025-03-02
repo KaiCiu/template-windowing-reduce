@@ -8,7 +8,7 @@ metadata:
 deployments:
   - name: Stream Producer
     application: Stream Producer
-    version: d1bd0a613b75cb35547f30e0624dfb28942cbeea
+    version: latest
     deploymentType: Service
     resources:
       cpu: 200
@@ -34,7 +34,6 @@ deployments:
       - name: input
         inputType: InputTopic
         description: Name of the input topic to listen to.
-        required: false
         value: raw-temp-data
       - name: output
         inputType: OutputTopic
