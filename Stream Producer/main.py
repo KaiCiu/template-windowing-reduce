@@ -9,7 +9,8 @@ import os
 
 from quixstreams import Application
 
-app = Application.Quix()
+# 确保 state 目录一致
+app = Application.Quix(state_directory="/app/state")
 destination_topic = app.topic(name='raw-temp-data', value_serializer="json")
 
 
