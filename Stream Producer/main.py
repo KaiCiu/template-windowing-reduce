@@ -42,8 +42,6 @@ start_time = time()
 boiling_start_time = None
 stop_time = None
 
-data_records = []  # 用于存储所有温度数据
-
 i = 0
 with app.get_producer() as producer:
     while True:
@@ -68,7 +66,6 @@ with app.get_producer() as producer:
         # 生成数据
         temperature = Temperature(datetime.now(), round(current_temperature, 2))
         data_dict = temperature.to_json()  # 转成字典
-        data_records.append(data_dict)  # 存入列表
 
         # 发送到 Quix
         serialized = destination_topic.serialize(
@@ -83,17 +80,3 @@ with app.get_producer() as producer:
 
         i += 1
         sleep(random.randint(0, 1000) / 1000)  # 维持数据频率
-
-# **Quix Cloud 适配：存储数据到 Quix 文件存储**
-# 生成文件名（包含处理完成时间）
-finish_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-file_name = f"temperature_data_{finish_time}.json"
-
-# 在 Quix Cloud 运行时，建议存储到 `/mnt/data/`，这样可以在 Quix UI 的 **File Storage** 访问
-file_path = f"/mnt/data/{file_name}"
-
-# 保存数据到 JSON 文件
-with open(file_path, "w", encoding="utf-8") as f:
-    json.dump(data_records, f, indent=4)
-
-print(f"Data archived to {file_path} (accessible in Quix File Storage)")
