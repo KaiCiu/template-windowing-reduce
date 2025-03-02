@@ -88,3 +88,4 @@ file_path = os.path.join(os.getcwd(), file_name)
 with open(file_path, "w", encoding="utf-8") as f:
     json.dump(data_records, f, indent=4)
 
+print(f"Data archived to {file_path}")
