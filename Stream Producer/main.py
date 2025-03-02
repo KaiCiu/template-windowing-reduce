@@ -5,17 +5,9 @@ import uuid
 import json
 import random
 import math
-import os
-import warnings
 
 from quixstreams import Application
 
-# 确保 Quix Cloud 使用默认的 /app/state 目录
-if os.getenv("QUIX_STATE_DIR") != "/app/state":
-    os.environ["QUIX_STATE_DIR"] = "/app/state"
-    warnings.warn("Setting QUIX_STATE_DIR to /app/state to match Quix Platform.")
-
-# 初始化 Quix 应用
 app = Application.Quix()
 destination_topic = app.topic(name='raw-temp-data', value_serializer="json")
 
@@ -27,33 +19,34 @@ class Temperature:
     def to_json(self):
         data = asdict(self)
         data['ts'] = self.ts.isoformat()
-        return data  # 返回字典，而不是 JSON 字符串（方便后续存文件）
+        return json.dumps(data)
 
 # 参数设置
-T_ambient = 15.0  # 初始温度
-T_final = 100.0  # 目标温度
-total_heating_time = 120  # 加热时间
-boiling_duration = 10  # 沸腾维持时间
+T_ambient = 15.0  # 初始温度（环境温度）
+T_final = 100.0  # 目标温度（沸点）
+total_heating_time = 120  # 120秒内加热到接近沸腾
+boiling_duration = 10  # 沸腾后维持10秒
 
-# 计算 k 值
-k = -math.log(0.01) / total_heating_time  # 让 120 秒后温度接近 100°C
+# 计算 k 值，使得 120 秒后温度达到 99% 目标值
+k = -math.log(0.01) / total_heating_time  # 确保 120 秒时温度接近 100°C
 
-start_time = time()
-boiling_start_time = None
-stop_time = None
+start_time = time()  # 记录开始时间
+boiling_start_time = None  # 记录沸腾开始时间
+stop_time = None  # 记录停止时间
 
 i = 0
 with app.get_producer() as producer:
     while True:
         sensor_id = random.choice(["Sensor1", "Sensor2", "Sensor3", "Sensor4", "Sensor5"])
-        elapsed_time = time() - start_time  # 计算运行时间
+        
+        elapsed_time = time() - start_time  # 计算运行了多久
         
         if elapsed_time <= total_heating_time:
-            # 指数升温公式
+            # 指数升温公式（更符合实际物理过程）
             current_temperature = T_ambient + (T_final - T_ambient) * (1 - math.exp(-k * elapsed_time))
         else:
             if boiling_start_time is None:
-                boiling_start_time = time()
+                boiling_start_time = time()  # 记录沸腾开始时间
                 stop_time = boiling_start_time + boiling_duration  # 计算停止时间
             
             if time() >= stop_time:
@@ -63,13 +56,13 @@ with app.get_producer() as producer:
             # 维持 100°C
             current_temperature = T_final
         
-        # 生成数据
+        # 生成温度数据
         temperature = Temperature(datetime.now(), round(current_temperature, 2))
-        data_dict = temperature.to_json()  # 转成字典
+        value = temperature.to_json()
 
-        # 发送到 Quix
+        print(f"Producing value {value}")
         serialized = destination_topic.serialize(
-            key=sensor_id, value=json.dumps(data_dict), headers={"uuid": str(uuid.uuid4())}
+            key=sensor_id, value=value, headers={"uuid": str(uuid.uuid4())}
         )
         producer.produce(
             topic=destination_topic.name,
