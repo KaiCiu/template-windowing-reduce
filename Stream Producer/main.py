@@ -14,49 +14,48 @@ destination_topic = app.topic(name='raw-temp-data', value_serializer="json")
 @dataclass
 class Temperature:
     ts: datetime
-    value: float  # 允许浮点数
+    value: float  
 
     def to_json(self):
         data = asdict(self)
         data['ts'] = self.ts.isoformat()
         return json.dumps(data)
 
-# 参数设置
-T_ambient = 15.0  # 初始温度（环境温度）
-T_final = 100.0  # 目标温度（沸点）
-total_heating_time = 120  # 120秒内加热到接近沸腾
-boiling_duration = 10  # 沸腾后维持10秒
 
-# 计算 k 值，使得 120 秒后温度达到 99% 目标值
-k = -math.log(0.01) / total_heating_time  # 确保 120 秒时温度接近 100°C
+T_ambient = 15.0  
+T_final = 100.0  
+total_heating_time = 120  
+boiling_duration = 10  
 
-start_time = time()  # 记录开始时间
-boiling_start_time = None  # 记录沸腾开始时间
-stop_time = None  # 记录停止时间
+
+k = -math.log(0.01) / total_heating_time  
+
+start_time = time()  
+boiling_start_time = None  
+stop_time = None  
 
 i = 0
 with app.get_producer() as producer:
     while True:
         sensor_id = random.choice(["Sensor1", "Sensor2", "Sensor3", "Sensor4", "Sensor5"])
         
-        elapsed_time = time() - start_time  # 计算运行了多久
+        elapsed_time = time() - start_time 
         
         if elapsed_time <= total_heating_time:
-            # 指数升温公式（更符合实际物理过程）
+            
             current_temperature = T_ambient + (T_final - T_ambient) * (1 - math.exp(-k * elapsed_time))
         else:
             if boiling_start_time is None:
-                boiling_start_time = time()  # 记录沸腾开始时间
-                stop_time = boiling_start_time + boiling_duration  # 计算停止时间
+                boiling_start_time = time()  
+                stop_time = boiling_start_time + boiling_duration  
             
             if time() >= stop_time:
                 print("Simulation finished.")
-                break  # 停止数据生成
-
-            # 维持 100°C
+                break  
+           
             current_temperature = T_final
         
-        # 生成温度数据
+        
         temperature = Temperature(datetime.now(), round(current_temperature, 2))
         value = temperature.to_json()
 
@@ -72,4 +71,4 @@ with app.get_producer() as producer:
         )
 
         i += 1
-        sleep(random.randint(0, 1000) / 1000)  # 维持数据频率
+        sleep(random.randint(0, 1000) / 2000)  
