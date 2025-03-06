@@ -75,7 +75,7 @@ sdf = (
 sdf = sdf.apply(
     lambda value: {
         "time": value["end"],  # 窗口结束时间
-        "count": value["value"]["count"],  # ✅ 直接展开字典
+        "count": value["value"]["count"],
         "min": value["value"]["min"],
         "max": value["value"]["max"],
         "mean": value["value"]["mean"],
@@ -85,6 +85,8 @@ sdf = sdf.apply(
 
 sdf = sdf.to_topic(output_topic)
 sdf = sdf.update(lambda value: logger.info(f"Produced value: {value}"))
+sdf = sdf.update(lambda value: logger.info(f"Keys in value: {list(value.keys())}"))
+
 
 if __name__ == "__main__":
     logger.info("Starting application")
