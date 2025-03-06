@@ -74,11 +74,8 @@ sdf = (
 ### Apply the window to the Streaming DataFrame and define the data points to include in the output
 sdf = sdf.apply(
     lambda value: {
-        "time": value["end"],  # 作为 InfluxDB 的 timestamp
-        "count": value["value"]["count"],
-        "min": value["value"]["min"],
-        "max": value["value"]["max"],
-        "mean": value["value"]["mean"],
+        "time": value["end"],  # 窗口结束时间
+        **json.loads(value["value"])  # 解析 JSON 字符串并展开字段
     }
 )
 
