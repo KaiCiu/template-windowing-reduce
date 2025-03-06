@@ -75,10 +75,10 @@ sdf = (
 sdf = sdf.apply(
     lambda value: {
         "time": value["end"],  # 窗口结束时间
-        "count": value["temperature"]["count"],  # ✅ 直接展开字典
-        "min": value["temperature"]["min"],
-        "max": value["temperature"]["max"],
-        "mean": value["temperature"]["mean"],
+        "count": value["value"]["count"],  # ✅ 直接展开字典
+        "min": value["value"]["min"],
+        "max": value["value"]["max"],
+        "mean": value["value"]["mean"],
     }
 )
 
