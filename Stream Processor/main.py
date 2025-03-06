@@ -85,7 +85,7 @@ sdf = sdf.apply(
 
 sdf = sdf.to_topic(output_topic)
 sdf = sdf.update(lambda value: logger.info(f"Produced value: {value}"))
-sdf = sdf.update(lambda value: logger.info(f"Keys in value: {list(value.keys())}"))
+
 
 
 if __name__ == "__main__":
