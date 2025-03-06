@@ -75,7 +75,10 @@ sdf = (
 sdf = sdf.apply(
     lambda value: {
         "time": value["end"],  # 窗口结束时间
-        **json.loads(value["value"])  # 解析 JSON 字符串并展开字段
+        "count": value["temperature"]["count"],  # ✅ 直接展开字典
+        "min": value["temperature"]["min"],
+        "max": value["temperature"]["max"],
+        "mean": value["temperature"]["mean"],
     }
 )
 
