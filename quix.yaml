@@ -14,7 +14,7 @@ deployments:
       cpu: 200
       memory: 500
       replicas: 1
-    desiredStatus: Running
+    desiredStatus: Stopped
     variables:
       - name: output
         inputType: OutputTopic
@@ -23,7 +23,7 @@ deployments:
         value: raw-temp-data
   - name: Stream Processor
     application: Stream Processor
-    version: 49abc0602921d3c4143462a5eb4bbc1c39ec5d68
+    version: 95b2b388b32046e943909c6c32b7831ffba215ef
     deploymentType: Service
     resources:
       cpu: 200
