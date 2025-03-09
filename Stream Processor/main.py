@@ -39,23 +39,20 @@ def custom_ts_extractor(value):
 input_topic = app.topic(TOPIC, timestamp_extractor=custom_ts_extractor, value_deserializer="json") 
 
 def initializer(value: dict) -> dict:
-
-    value_dict = json.loads(value)
     return {
         'count': 1,
-        'min': value_dict['value'],
-        'max': value_dict['value'],
-        'mean': value_dict['value'],
+        'min': value['value'],
+        'max': value['value'],
+        'mean': value['value'],
     }
 
 def reducer(aggregated: dict, value: dict) -> dict:
     aggcount = aggregated['count'] + 1
-    value_dict = json.loads(value)
     return {
         'count': aggcount,
-        'min': min(aggregated['min'], value_dict['value']),
-        'max': max(aggregated['max'], value_dict['value']),
-        'mean': (aggregated['mean'] * aggregated['count'] + value_dict['value']) / (aggregated['count'] + 1)
+        'min': min(aggregated['min'], value['value']),
+        'max': max(aggregated['max'], value['value']),
+        'mean': (aggregated['mean'] * aggregated['count'] + value['value']) / aggcount
     }
 
 ### Define the window parameters such as type and length
@@ -74,14 +71,13 @@ sdf = (
 ### Apply the window to the Streaming DataFrame and define the data points to include in the output
 sdf = sdf.apply(
     lambda value: {
-        'time': value["end"],  # 窗口结束时间
+        'time': value["end"],  # 结束时间
         'count': value["value"]["count"],
         'min': value["value"]["min"],
         'max': value["value"]["max"],
         'mean': value["value"]["mean"],
     }
 )
-
 
 sdf = sdf.to_topic(output_topic)
 sdf = sdf.update(lambda value: logger.info(f"Produced value: {value}"))
