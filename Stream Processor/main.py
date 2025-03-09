@@ -74,8 +74,11 @@ sdf = (
 ### Apply the window to the Streaming DataFrame and define the data points to include in the output
 sdf = sdf.apply(
     lambda value: {
-        "time": value["end"], # Use the window end time as the timestamp for message sent to the 'agg-temperature' topic
-        "temperature": value["value"], # Send a dictionary of {count, min, max, mean} values for the temperature parameter
+        'time': value["end"],  # 结束时间
+        'count': value["value"]["count"],
+        'min': value["value"]["min"],
+        'max': value["value"]["max"],
+        'mean': value["value"]["mean"],
     }
 )
 
