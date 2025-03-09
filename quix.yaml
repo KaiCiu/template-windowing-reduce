@@ -23,7 +23,7 @@ deployments:
         value: raw-temp-data
   - name: Stream Processor
     application: Stream Processor
-    version: 93f7d4e3b7030eccfc763913e477e1b036d5e437
+    version: 6a0cfb2917f98dbfffefc6d87db495b96188959e
     deploymentType: Service
     resources:
       cpu: 200
