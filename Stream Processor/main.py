@@ -40,7 +40,7 @@ input_topic = app.topic(TOPIC, timestamp_extractor=custom_ts_extractor, value_de
 
 def initializer(value: dict) -> dict:
     return {
-        'count': 1,
+        'count_value': 1,
         'min': value['value'],
         'max': value['value'],
         'mean': value['value'],
@@ -52,7 +52,7 @@ def reducer(aggregated: dict, value: dict) -> dict:
 
     aggcount = aggregated['count'] + 1
     return {
-        'count': aggcount,
+        'count_value': aggcount,
         'min': min(aggregated['min'], value['value']),
         'max': max(aggregated['max'], value['value']),
         'mean': (aggregated['mean'] * aggregated['count'] + value['value']) / aggcount
@@ -76,7 +76,7 @@ sdf = (
 sdf = sdf.apply(
     lambda value: {
         'time': value["end"],  # 结束时间
-        'count': value["value"]["count"],
+        'count_value': value["value"]["count_value"],
         'min': value["value"]["min"],
         'max': value["value"]["max"],
         'mean': value["value"]["mean"],
