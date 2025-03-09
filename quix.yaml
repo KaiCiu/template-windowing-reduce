@@ -23,13 +23,13 @@ deployments:
         value: raw-temp-data
   - name: Stream Processor
     application: Stream Processor
-    version: 9dc09ca3e7c1e8ef02c6f81fab5982d2993364f6
+    version: 3d616f8e8c320b6b358fbcc94e3bc50a638be962
     deploymentType: Service
     resources:
       cpu: 200
       memory: 500
       replicas: 1
-    desiredStatus: Running
+    desiredStatus: Stopped
     variables:
       - name: input
         inputType: InputTopic
