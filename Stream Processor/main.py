@@ -47,6 +47,9 @@ def initializer(value: dict) -> dict:
     }
 
 def reducer(aggregated: dict, value: dict) -> dict:
+    if isinstance(value, str):  
+        value = json.loads(value)  # 解析 JSON
+
     aggcount = aggregated['count'] + 1
     return {
         'count': aggcount,
@@ -54,6 +57,7 @@ def reducer(aggregated: dict, value: dict) -> dict:
         'max': max(aggregated['max'], value['value']),
         'mean': (aggregated['mean'] * aggregated['count'] + value['value']) / aggcount
     }
+
 
 ### Define the window parameters such as type and length
 
