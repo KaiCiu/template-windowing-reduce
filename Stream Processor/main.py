@@ -42,20 +42,20 @@ def initializer(value: dict) -> dict:
 
     value_dict = json.loads(value)
     return {
-        'count_value': 1,
+        'count': 1,
         'min': value_dict['value'],
         'max': value_dict['value'],
         'mean': value_dict['value'],
     }
 
 def reducer(aggregated: dict, value: dict) -> dict:
-    aggcount = aggregated['count_value'] + 1
+    aggcount = aggregated['count'] + 1
     value_dict = json.loads(value)
     return {
-        'count_value': aggcount,
+        'count': aggcount,
         'min': min(aggregated['min'], value_dict['value']),
         'max': max(aggregated['max'], value_dict['value']),
-        'mean': (aggregated['mean'] * aggregated['count_value'] + value_dict['value']) / (aggregated['count_value'] + 1)
+        'mean': (aggregated['mean'] * aggregated['count'] + value_dict['value']) / (aggregated['count'] + 1)
     }
 
 ### Define the window parameters such as type and length
@@ -74,19 +74,13 @@ sdf = (
 ### Apply the window to the Streaming DataFrame and define the data points to include in the output
 sdf = sdf.apply(
     lambda value: {
-        "time": value["end"],  # 窗口结束时间
-        "count_value": value["value"]["count_value"],
-        "min": value["value"]["min"],
-        "max": value["value"]["max"],
-        "mean": value["value"]["mean"],
+        "time": value["end"], # Use the window end time as the timestamp for message sent to the 'agg-temperature' topic
+        "temperature": value["value"], # Send a dictionary of {count, min, max, mean} values for the temperature parameter
     }
 )
 
-
 sdf = sdf.to_topic(output_topic)
 sdf = sdf.update(lambda value: logger.info(f"Produced value: {value}"))
-
-
 
 if __name__ == "__main__":
     logger.info("Starting application")
