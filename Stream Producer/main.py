@@ -71,4 +71,4 @@ with app.get_producer() as producer:
         )
 
         i += 1
-        sleep(random.randint(0, 1000) / 2000)  
+        sleep(random.randint(0, 100) / 1000)  
